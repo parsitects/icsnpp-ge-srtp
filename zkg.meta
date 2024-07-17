@@ -1,0 +1,23 @@
+[package]
+script_dir = scripts
+test_command = cd testing && btest -c btest.cfg
+summary = GE_-SRTP is a proprietary protocol used for communication between a GE PLC and a GE HMI.
+description = GE-SRTP is a proprietary protocol used for communication between a GE PLC and a GE HMI.
+    The GE-SRTP protocol parser is based off of the research paper that can be accessed at https://digitalcommons.newhaven.edu/electricalcomputerengineering-facpubs/70/
+    Like Modbus, the GE-SRTP protocol can read both discrete and analog inputs.
+depends = 
+    zeek >=6.0.0
+build_command = mkdir -p build && cd build && SPICYZ=$(command -v spicyz || echo %(package_base)s/spicy-plugin/build/bin/spicyz) cmake .. && cmake --build .
+
+[template]
+source = https://github.com/zeek/package-template
+version = v3.1.0
+zkg_version = 2.13.0-46
+features = spicy-protocol-analyzer
+
+[template_vars]
+name = spicy-GE_SRTP
+analyzer = GE_SRTP
+transport = TCP
+unit_orig = SRTP_Headers
+unit_resp = SRTP_Headers

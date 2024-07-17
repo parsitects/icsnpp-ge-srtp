@@ -1,0 +1,33 @@
+## Copyright (c) 2024 Battelle Energy Alliance, LLC. 
+
+module GE_SRTP_FUNCTIONS;
+
+public function generateId() : string &cxxname="GE_SRTP_GENERATEID::generateId";
+
+public function uintToHexString(data: uint64): string {
+    return "0x%02x" % data;
+}
+
+public function bytesToHexString(data: bytes): string {
+    local bytesAsHexString : string;
+    local cnt : uint8;
+
+    cnt = 0;
+    bytesAsHexString = "";
+
+    for (byte in data) {
+        bytesAsHexString = bytesAsHexString + ("%02x" % byte);
+
+        ++cnt;
+        if (cnt >= 15) {
+            break;
+        }
+    }
+
+    if (cnt > 0) {
+        bytesAsHexString = "0x" + bytesAsHexString;
+    }
+
+    return bytesAsHexString;
+}
+

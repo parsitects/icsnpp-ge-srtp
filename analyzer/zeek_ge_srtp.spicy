@@ -1,0 +1,15 @@
+## Copyright (c) 2024 Battelle Energy Alliance, LLC. 
+
+module Zeek_GE_SRTP;
+
+import GE_SRTP;
+import spicy;
+
+on GE_SRTP::Message::%done {
+    spicy::accept_input();
+}
+
+on GE_SRTP::Message::%error {
+    spicy::decline_input("error parsing GE_SRTP message");
+}
+

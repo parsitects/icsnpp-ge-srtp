@@ -1,0 +1,203 @@
+## Copyright (c) 2024 Battelle Energy Alliance, LLC. 
+
+module GE_SRTP_ENUMS;
+
+import spicy;
+
+#
+# Leveraging the SRTP Protocol for Over the Network Memory Acquistion of a GE Fanuc Series 90-30.pdf
+#    Table 1 - Request message structure
+#    Table 4 - ACK reply message structure
+#
+public type SrtpType = enum {
+    REQUEST = 0x02,
+    REPLY   = 0x03
+};
+
+#
+# Leveraging the SRTP Protocol for Over the Network Memory Acquistion of a GE Fanuc Series 90-30.pdf
+#    Table 2 - Type of service request codes
+#
+public type ServiceRequestCodes = enum {
+    PLC_SHORT_STATUS_REQUEST                  = 0x00,
+    RETURN_CONTROL_PROGRAM_NAMES              = 0x03,
+    READ_SYSTEM_MEMORY                        = 0x04,
+    READ_TASK_MEMORY                          = 0x05,
+    READ_PROGRAM_MEMORY                       = 0x06,
+    WRITE_SYSTEM_MEMORY                       = 0x07,
+    WRITE_TASK_MEMORY                         = 0x08,
+    WRITE_PROGRAM_BLOCK_MEMORY                = 0x09,
+    PROGRAMMER_LOGON                          = 0x20,
+    CHANGE_PLC_CPU_PRIVILEGE_LEVEL            = 0x21,
+    SET_CONTROL_ID_CPU_ID                     = 0x22,
+    SET_PLC_RUN_VS_STOP                       = 0x23,
+    SET_PLC_TIME_DATE                         = 0x24,
+    RETURN_PLC_TIME_DATE                      = 0x25,
+    RETURN_FAULT_TABLE                        = 0x38,
+    CLEAR_FAULT_TABLE                         = 0x39,
+    PROGRAM_STORE_UPLOAD_FROM_PLC             = 0x3F,
+    PROGRAM_LOAD_DOWNLOAD_TO_PLC              = 0x40,
+    RETURN_CONTROLLER_TYPE_AND_ID_INFORMATION = 0x43,
+    TOGGLE_FORCE_SYSTEM_MEMORY                = 0x44,
+};
+
+#
+# Leveraging the SRTP Protocol for Over the Network Memory Acquistion of a GE Fanuc Series 90-30.pdf
+#    Table 3 - Segment selectors overview
+#
+public type SegmentSelectors = enum {
+    DISCRETE_INPUTS_BIT_SELECTOR       = 0x46,
+    DISCRETE_INPUTS_BYTE_SELECTOR      = 0x10,
+    DISCRETE_OUTPUTS_BIT_SELECTOR      = 0x48,
+    DISCRETE_OUTPUTS_BYTE_SELECTOR     = 0x12,
+    DISCRETE_INTERNALS_BIT_SELECTOR    = 0x4C,
+    DISCRETE_INTERNALS_BYTE_SELECTOR   = 0x16,
+    DISCRETE_TEMPORARIES_BIT_SELECTOR  = 0x4A,
+    DISCRETE_TEMPORARIES_BYTE_SELECTOR = 0x14,
+    SA_DISCRETE_BIT_SELECTOR           = 0x4E,
+    SA_DISCRETE_BYTE_SELECTOR          = 0x18,
+    SB_DISCRETE_BIT_SELECTOR           = 0x50,
+    SB_DISCRETE_BYTE_SELECTOR          = 0x1A,
+    SC_DISCRETE_BIT_SELECTOR           = 0x52,
+    SC_DISCRETE_BYTE_SELECTOR          = 0x1C,
+    S_DISCRETE_BIT_SELECTOR            = 0x54,
+    S_DISCRETE_BYTE_SELECTOR           = 0x1E,
+    GENIUS_GLOBAL_DATA_BIT_SELECTOR    = 0x56,
+    GENIUS_GLOBAL_DATA_BYTE_SELECTOR   = 0x38,
+    ANALOG_INPUTS_WORD_SELECTOR        = 0x0A,
+    ANALOG_OUTPUTS_WORD_SELECTOR       = 0x0C,
+    REGISTERS_WORD_SELECTOR            = 0x08,
+};
+
+#
+# General Electric 1998 Series 90 PLC SNP Communications
+#    Table 3-8. Bits of the PLC Status Word
+#
+public type PLC_State = enum {
+    RUN_IO_ENABLED   = 0,
+    RUN_IO_DISABLED  = 1,
+    STOP_IO_DISABLED = 2,
+    CPU_STOP_FAULTED = 3,
+    CPU_HALTED       = 4,
+    CPU_SUSPENDED    = 5,
+    STOP_IO_ENABLED  = 6,
+};
+
+#
+# General Electric 1998 Series 90 PLC SNP Communications
+#    Mailbox Message types
+#
+public type MessageType = enum {
+    REQUEST_MAILBOX_MESSAGE                  = 0xC0,
+    REQUEST_MAILBOX_MESSAGE_WITH_TEXT_BUFFER = 0x80,
+    ACK_MAILBOX_MESSAGE                      = 0xD4,
+    ACK_MAILBOX_MESSAGE_WITH_TEXT_BUFFER     = 0x94,
+    ERROR_NACK_MAILBOX_MESSAGE               = 0xD1,
+};
+
+#
+# General Electric 1998 Series 90 PLC SNP Communications
+#    Table 3-12 Major Error Status Codes
+#
+public type ErrorStatus = enum {
+    NO_ERROR_OCCURRED       = 0x00,
+    ILLEGAL_SERVICE_REQUEST = 0x01,
+    INSUFFICIENT_PRIVILEGE  = 0x02,
+    PROTOCOL_SEQUENCE_ERROR = 0x04,
+    SERVICE_REQUEST_ERROR   = 0x05,
+    ILLEGAL_MAILBOX_TYPE    = 0x06,
+    REQUEST_QUEUE_FULL      = 0x07,
+};
+
+#
+# General Electric 1998 Series 90 PLC SNP Communications
+#    Table 3-13 Minor Error Status Codes
+#    Table 3-14 Minor Error Status Codes
+#
+public type MinorErrorStatus = enum {
+    NO_MINOR_ERROR_OCCURRED                            = 0x00,
+    SERVICE_REQUEST_ABORTED                            = 0xFF,
+    NO_PRIVILEGE_FOR_OPERATION                         = 0xFE,
+    UNABLE_TO_PERFORM_AUTO_CONFIG                      = 0xFD,
+    IO_CONFIG_INVALID                                  = 0xFC,
+    CANNOT_CLEAR_IO_CONFIG                             = 0xFB,
+    CANNOT_REPLACE_IO_MODULE                           = 0xFA,
+    TASK_ADDRESS_OUT_OF_RANGE                          = 0xF9,
+    INVALID_TASK_NAME_REFERENCED                       = 0xF8,
+    REQUIRED_TO_LOG_IN_TO_A_TASK_FOR_SERVICE           = 0xF7,
+    INVALID_SWEEP_STATE_TO_SET                         = 0xF6,
+    INVALID_PASSWORD                                   = 0xF5,
+    INVALID_INPUT_PARAMETER                            = 0xF4,
+    IO_CONFIG_MISMATCH                                 = 0xF3,
+    INVALID_PROGRAM_CANNOT_LOG_IN                      = 0xF2,
+    REQUEST_ONLY_VALID_FROM_PROGRAMMER                 = 0xF1,
+    REQUEST_ONLY_VALID_IN_STOP_MODE                    = 0xF0,
+    PROGRAMMER_IS_ALREADY_ATTACHED                     = 0xEF,
+    COULD_NOT_RETURN_BLOCK_SIZES                       = 0xEE,
+    VMEBUS_ERROR_ENCOUNTERED                           = 0xED,
+    TASK_UNABLE_TO_BE_CREATED                          = 0xEC,
+    TASK_UNABLE_TO_BE_DELETED                          = 0xEB,
+    NOT_LOGGED_INTO_PROCESS_SERVICE_REQUEST            = 0xEA,
+    SEGMENT_SELECTOR_NOT_VALID_IN_CONTEXT              = 0xE9,
+    NO_USER_MEMORY_AVAILABLE_TO_ALLOCATE               = 0xE8,
+    CONFIG_IS_NOT_VALID                                = 0xE7,
+    CPU_MODEL_DOES_NOT_MATCH                           = 0xE6,
+    DOS_FILE_AREA_NOT_FORMATTED                        = 0xE5,
+    SEGMENT_FOR_SELECTOR_DOES_NOT_EXIST                = 0xE4,
+    CPU_REVISION_NUMBER_DOES_NOT_MATCH                 = 0xE3,
+    IOS_COULD_NOT_DELETE_CONFIG                        = 0xE2,
+    NO_IO_CONFIG_TO_READ_OR_DELETE                     = 0xE1,
+    SERVICE_IN_PROCESS_CANNOT_LOGIN                    = 0xE0,
+    INVALID_DATAGRAM_CONNECITON_INVALID                = 0xDF,
+    SIZE_OF_DATAGRAM_CONNECITON_INVALID                = 0xDE,
+    UNABLE_TO_LOCATE_CONNECTION_ID                     = 0xDD,
+    UNABLE_TO_FIND_CONNECTION_ADDRESS                  = 0xDC,
+    INVALID_SEGMENT_SELECTOR_IN_DATAGRAM               = 0xDB,
+    NULL_POINTER_TO_DATA_SEGMENT_SELECTOR              = 0xDA,
+    TRANSFER_TYPE_INVALID_FOR_SELECTOR                 = 0xD9,
+    POINT_LENGTH_NOT_ALLOWED                           = 0xD8,
+    INVALID_DATAGRAM_TYPE_SPECIFIED                    = 0xD7,
+    DATAGRAM_CONNECTION_BOUNDARY_EXCEEDED              = 0xD6,
+    INVALID_BLOCK_NAME_SPECIFIED                       = 0xD5,
+    MISMATCH_OF_CONFIG_CHECKSUM                        = 0xD4,
+    UPM_EXCEEDED_BLOCK_END                             = 0xD3,
+    INVALID_WRITE_MODE_PARAMETER                       = 0xD2,
+    PACKET_SIZE_DOES_NOT_MATCH_INPUT                   = 0xD1,
+    PLC_MODULES_CONFIGURED_HAVE_UNSUPPORTED_REVISION   = 0xD0,
+    SPECIFIED_DEVICE_IS_NOT_AVAILABLE                  = 0xCF,
+    SPECIFIED_DEVICE_HAS_INSUFFICENT_MEMORY            = 0xCE,
+    ATTEMPT_TO_READ_DEVICE_BUT_NO_DATA_STORED_ON_IT    = 0xCD,
+    DATA_STORED_ON_DEVICE_CORRUPTED_AND_NOT_AVAILABLE  = 0xCC,
+    COMM_WRITE_VERIFY_ERROR_OCCURRED_DURING_SAVE       = 0xCB,
+    DEVICE_IS_WRITE_PROTECTED                          = 0xCA,
+    LOGIN_USING_NON_ZERO_BUFFER_SIZE_REQUIRED          = 0xC9,
+    PASSWORD_ALREADY_ENABLED                           = 0xC8,
+    PASSWORD_SET_TO_INACTIVE                           = 0xC7,
+    REQUESTOR_NOT_LOGGED_INTO_MAIN_CONTROL_PROGRAM     = 0xC6,
+    NO_TASK_LEVEL_RACK_CONFIG_TO_READ                  = 0xC5,
+    VERIFY_WITH_FA_CARD_OR_EEPROM_FAILED               = 0xC4,
+    TEXT_LENGTH_DOES_NOT_MATCH_TRAFFIC_TYPE            = 0xC3,
+    THE_OEM_KEY_IS_NULL                                = 0xC2,
+    INVALID_BLOCK_STATE_TRANSITION                     = 0xC1,
+    BAD_OMF_RECORD_CHECKSUM_IN_STORE                   = 0xC0,
+    ILLEGAL_OMF_RECORD_TYPE_CONTENTS                   = 0xBF,
+    BAD_BLOCK_TYPE_GIVEN_IN_LOAD                       = 0xBE,
+    BLOCK_SET_NOT_FOUND                                = 0xBD,
+    BLOCK_TYPE_NOT_FOUND                               = 0xBC,
+    MAX_LENGTH_OF_A_PARTIAL_STORE_EXCEEDED             = 0xBB,
+    BLOCK_SET_ALREADY_EXISTS                           = 0xBA,
+    EXECUTABLE_FLAG_TYPEDER_RECORD_NOT_SET             = 0xB9,
+    SIZE_OF_SEGMENT_SELECTOR_TABLE_RECORD_NOT_CORRECT  = 0xB8,
+    SEGMENT_LENGTH_NOT_EQUAL_TO_SEGMENT_BLOCK          = 0xB7,
+    CRC_CHECKSUM_COMPARISON_IN_VERIFY_FAILED           = 0xB6,
+    ADDITIVE_CHECKSUM_CMOPARISION_IN_VERIFY_FAILED     = 0xB5,
+    ALTER_INTERRUPT_LIST_IN_DECL_BLOCK_DURING_RUNTIME  = 0xB4,
+    LENGTH_LIMIT_EXCEEDED                              = 0xB3,
+    PROGRAM_BLOCK_ALREADY_EXISTS                       = 0xB2,
+    PROBLEM_SENDING_MAIL_TO_SLAVE_SERVICE_REQ_TASK     = 0x50,
+    PROBLEM_GETTING_MAIL_FROM_SLAVE_SERVICE_REQ_TASK   = 0x51,
+    SLAVE_TASK_TIMED_OUT                               = 0x55,
+    SLAVE_TASK_COULD_NOT_FIND_REQUESTED_CONNECTION     = 0x56,
+    SLAVE_TASK_ENCOUNTERED_AN_ERROR_WRITING_DATAGRAM   = 0x57,
+    SLAVE_TASK_ENCOUNTERED_AN_ERROR_UPDATING_DATAGRAM  = 0x58,
+};

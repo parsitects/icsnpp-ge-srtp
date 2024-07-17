@@ -1,0 +1,188 @@
+## Copyright (c) 2024 Battelle Energy Alliance, LLC. 
+
+module GE_SRTP;
+
+import spicy;
+import GE_SRTP_ENUMS;
+import GE_SRTP_FUNCTIONS;
+
+public type Messages = unit {
+     : Message[];
+};
+
+public type Message = unit {
+    srtp_type : uint8 &convert=GE_SRTP_ENUMS::SrtpType($$);
+    switch(self.srtp_type) {
+        GE_SRTP_ENUMS::SrtpType::REQUEST -> request : Request();
+        GE_SRTP_ENUMS::SrtpType::REPLY   -> reply   : Reply();
+    };
+
+    on %error(msg: string) {
+        print "ON ERROR: %s" % msg;
+    }
+};
+
+#
+# Leveraging the SRTP Protocol for Over the Network Memory Acquistion of a GE Fanuc Series 90-30.pdf
+#    Table 1 - Request message structure
+#
+# Request message structure
+#
+# --------------------------------------------------------
+# Byte offset  |  Field type              |   Common value
+# --------------------------------------------------------
+# 0            |  type                    |   0x02
+# 1            |  unknown/reserved        |   0x00
+# 2            |  sequence_number         |
+# 3            |  unknown/reserved        |   0x00
+# 4-5          |  text length             |   0x00 00 <== Deviation from reference docs (2 bytes vs 1)
+# 6-8          |  unknown/reserved        |   0x00
+# 9            |  unknown/reserved        |   0x01
+# 10-16        |  unknown/reserved        |   0x00
+# 17           |  unknown/reserved        |   0x01
+# 18-25        |  unknown/reserved        |   0x00
+# 26           |  time (seconds)          |
+# 27           |  time (minutes)          |
+# 28           |  time (hours)            |
+# 29           |  unknown/reserved        |  0x00
+# 30           |  sequence_number         |    
+# 31           |  message type            |  0xc0
+# 32-35        |  mailbox source          |  0x00 00 00 00
+# 36-39        |  mailbox destination     |  0x10 0e 00 00
+# 40           |  packet number           |  0x01
+# 41           |  total packet number     |  0x01
+# 42           |  service request code    |
+# 43-47        |  request type dependent  |
+# 48-55        |  unknown/reserved        |  0x00
+# --------------------------------------------------------
+#
+# If the request message structure is greater than 56 bytes, then the length of the
+# extra data is stored in the text length field.
+#
+# NOTE: The unknown/reserved bytes have been "squeezed" together
+#       to help readability
+#
+type Request = unit {
+    unknown_offset_1        : uint8;                                                  # Byte offset 1
+    sequence_number_1       : uint8;                                                  # Byte offset 2
+    unknown_offset_3        : uint8;                                                  # Byte offset 3
+    text_length             : uint16;                                                 # Byte offset 4-5
+    unknown_offset_5_to_25  : bytes &size=20;                                         # Byte offset 6-25 (squeezed)
+    time_seconds            : uint8;                                                  # Byte offset 26
+    time_minutes            : uint8;                                                  # Byte offset 27
+    time_hours              : uint8;                                                  # Byte offset 28
+    unknown_offset_29       : uint8;                                                  # Byte offset 29
+    sequence_number_2       : uint8;                                                  # Byte offset 30
+    message_type            : uint8 &convert=GE_SRTP_ENUMS::MessageType($$);          # Byte offset 31
+    mailbox_source          : bytes &size=4
+                                    &convert=GE_SRTP_FUNCTIONS::bytesToHexString($$); # Byte offset 32-35
+    mailbox_destination     : bytes &size=4
+                                    &convert=GE_SRTP_FUNCTIONS::bytesToHexString($$); # Byte offset 36-39
+    packet_number           : uint8;                                                  # Byte offset 40
+    total_packet_number     : uint8;                                                  # Byte offset 41
+    service_request_code    : uint8 &convert=GE_SRTP_ENUMS::ServiceRequestCodes($$);  # Byte offset 42
+    segment_selector        : uint8 &convert=GE_SRTP_ENUMS::SegmentSelectors($$);     # Byte offset 43
+    memory_offset           : uint16;                                                 # Byte offset 44-45
+    data_length             : uint16;                                                 # Byte offset 46-47 
+    unknown_offset_48_to_55 : bytes &size=8;                                          # Byte offset 48-55 (squeezed)
+    text_buffer             : bytes &size=self.text_length 
+                                    &convert=GE_SRTP_FUNCTIONS::bytesToHexString($$);
+} &byte-order=spicy::ByteOrder::Little;
+
+#
+# Leveraging the SRTP Protocol for Over the Network Memory Acquistion of a GE Fanuc Series 90-30.pdf
+#    Table 4 - ACK reply message structure
+#
+# Note: Bitfield structure for bytes 54-55 comes from General Electric 1998 Series 90 PLC SNP Communications gfk-0529
+#          Table 3-8. Bits of the PLC Status Word
+#
+# ACK Reply message structure
+#
+# ----------------------------------------------------------
+# Byte offset  |  Field type                |   Common value
+# ----------------------------------------------------------
+# 0            |  type                      |   0x03
+# 1            |  unknown/reserved          |   0x00
+# 2            |  sequence_number           |
+# 3            |  unknown/reserved          |   0x00
+# 4-5          |  text length               |   0x00 00 <== Deviation from reference docs (2 bytes vs 1)
+# 6-8          |  unknown/reserved          |   0x00
+# 17           |  unknown/reserved          |   0x01
+# 18-25        |  unknown/reserved          |   0x00
+# 26           |  time (seconds)            |
+# 27           |  time (minutes)            |
+# 28           |  time (hours)              |
+# 29           |  unknown/reserved          |  0x00
+# 30           |  unknown/reserved          |  value varies
+# 31           |  message type              |  0xd4
+# 32-35        |  mailbox source            |  0x10 03 00 00
+# 36-39        |  mailbox destination       |  0x20 5a 00 00
+# 40           |  packet number             |  0x01
+# 41           |  total packet number       |  0x01
+# 42           |  status code               |
+# 43           |  minor status code         |
+# 44-49        |  return data               |
+# 50           |  control_program_number    |
+# 51           |  current_privilege_level   |
+# 52-53        |  last_sweep_time   |
+# 54-55        |  PLC status                |
+#   Bit 0      |  oversweep flag            |
+#   Bit 1      |  constant_sweep_mode       |
+#   Bit 2      |  plc_fault_entry_last_read |
+#   Bit 3      |  io_fault_entry_last_read  |
+#   Bit 4      |  plc_fault_entry_present   |
+#   Bit 5      |  io_fault_entry_present    |
+#   Bit 6      |  programmer_attachement    |
+#   Bit 7      |  front_panel_enable_switch |
+#   Bit 8      |  front_panel_run_switch    |
+#   Bit 9      |  oem_protected             |
+#   Bit 10-11  |  not_used                  |
+#   Bit 12-15  |  plc_state                 |
+# --------------------------------------------------------------
+#
+# If the request message structure is greater than 56 bytes, then the length of the
+# extra data is stored in the text length field.
+#
+# NOTE: The unknown/reserved bytes have been "squeezed" together
+#       to help readability
+#
+type Reply = unit {
+    unknown_offset_1         : uint8;                                                           # Byte offset 1
+    sequence_number_1        : uint8;                                                           # Byte offset 2
+    unknown_offset_3         : uint8;                                                           # Byte offset 3
+    text_length              : uint16;                                                          # Byte offset 4-5
+    unknown_offset_5_to_25   : bytes &size=20;                                                  # Byte offset 6-25 (squeezed)
+    time_seconds             : uint8;                                                           # Byte offset 26
+    time_minutes             : uint8;                                                           # Byte offset 27
+    time_hours               : uint8;                                                           # Byte offset 28
+    unknown_offset_29_to_30  : bytes &size=2;                                                   # Byte offset 29-30 (squeezed)
+    message_type             : uint8 &convert=GE_SRTP_ENUMS::MessageType($$);                   # Byte offset 31
+    mailbox_source           : bytes &size=4
+                                     &convert=GE_SRTP_FUNCTIONS::bytesToHexString($$);          # Byte offset 32-35
+    mailbox_destination      : bytes &size=4                                                 
+                                     &convert=GE_SRTP_FUNCTIONS::bytesToHexString($$);          # Byte offset 36-39
+    packet_number            : uint8;                                                           # Byte offset 40
+    total_packet_number      : uint8;                                                           # Byte offset 41
+    status_code              : uint8 &convert=GE_SRTP_ENUMS::ErrorStatus($$);                   # Byte offset 42
+    minor_status_code        : uint8 &convert=GE_SRTP_ENUMS::MinorErrorStatus($$);              # Byte offset 43
+    data_requested           : bytes &size=6 &convert=GE_SRTP_FUNCTIONS::bytesToHexString($$);  # Byte offset 44-49
+    control_program_number   : uint8;                                                           # Byte offset 50
+    current_privilege_level  : uint8;                                                           # Byte offset 51
+    last_sweep_time          : uint16;                                                          # Byte offset 52-53
+    plc_status               : bitfield(16) {                                                   # Byte offset 54-55
+                                    oversweep_flag            : 0;
+                                    constant_sweep_mode       : 1;
+                                    plc_fault_entry_last_read : 2;
+                                    io_fault_entry_last_read  : 3;
+                                    plc_fault_entry_present   : 4;
+                                    io_fault_entry_present    : 5;
+                                    programmer_attachement    : 6;
+                                    front_panel_enable_switch : 7;
+                                    front_panel_run_switch    : 8;
+                                    oem_protected             : 9;
+                                    not_used                  : 10..11;
+                                    plc_state                 : 12..15 &convert=GE_SRTP_ENUMS::PLC_State($$);
+                               };
+    text_buffer              : bytes &size=self.text_length 
+                                     &convert=GE_SRTP_FUNCTIONS::bytesToHexString($$);
+} &byte-order=spicy::ByteOrder::Little;
