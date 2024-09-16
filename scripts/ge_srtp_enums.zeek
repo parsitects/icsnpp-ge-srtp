@@ -1,4 +1,4 @@
-## Copyright (c) 2024 Battelle Energy Alliance, LLC. 
+##! Copyright (c) 2024 Battelle Energy Alliance, LLC.
 
 module GE_SRTP_ENUMS;
 
