@@ -1,13 +1,12 @@
-## Copyright (c) 2024 Battelle Energy Alliance, LLC. 
+##! Copyright (c) 2024 Battelle Energy Alliance, LLC.
+##!
+##! main.zeek
+##!
+##! ICSNPP-GE_SRTP
+##!
+##! Zeek script type/record definitions describing the information
+##! that will be written to the log files.
 
-##
-## main.zeek
-##
-## ICSNPP-GE_SRTP
-##
-## Zeek script type/record definitions describing the information
-## that will be written to the log files.
-##
 
 module GE_SRTP;
 
